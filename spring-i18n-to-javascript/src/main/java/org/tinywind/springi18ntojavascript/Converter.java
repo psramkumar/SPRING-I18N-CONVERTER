@@ -119,7 +119,7 @@ public class Converter {
                 }
             }
         }
-        System.out.println("complete transform JSX -> JS");
+        System.out.println("complete convert message.properties -> message.js");
     }
 
     private static Configuration load(InputStream in) throws IOException {
@@ -165,6 +165,17 @@ public class Converter {
         configuration.getSources().forEach(source -> codegen.generate(new File(source.getSourceDir()), "", source));
     }
 
+    private static String preTrim(String str) {
+        final Matcher matcher = Pattern.compile("^(\\s+)").matcher(str);
+        if (!matcher.find()) return str;
+        return str.substring(matcher.end(), str.length());
+    }
+
+    private static boolean isContinuedLine(String line) {
+        final Matcher matcher = Pattern.compile("(\\\\+)$").matcher(line);
+        return matcher.find() && matcher.group().length() % 2 == 1;
+    }
+
     private void generate(File sourceDir, String subDir, Source source) {
         if (!sourceDir.exists())
             sourceDir = new File(sourceDir.getAbsolutePath());
@@ -183,10 +194,8 @@ public class Converter {
             return;
         }
 
-        final String fileFormat = "message_?([a-zA-Z_]+)?.properties";
+        final String fileFormat = "messages_?([a-zA-Z_]+)?.properties";
         final Pattern pattern = Pattern.compile(fileFormat);
-        final String postfix = ".properties";
-
         for (File file : childFiles) {
             if (file.exists() && !source.isOverwrite())
                 continue;
@@ -196,9 +205,9 @@ public class Converter {
             if (!matcher.find())
                 continue;
 
-            final String languageName = matcher.group().trim();
-            final String fileSubName = languageName.length() > 0 ? languageName : "default";
-            final File targetFile = new File(targetDir, fileName.substring(0, fileName.toLowerCase().lastIndexOf(postfix)) + "_" + fileSubName + ".js");
+            final String languageName = matcher.group(1);
+            final String fileSubName = languageName != null && languageName.trim().length() > 0 ? languageName : "default";
+            final File targetFile = new File(targetDir, fileSubName + ".js");
             if (targetFile.exists())
                 if (!source.isOverwrite() || targetFile.isDirectory())
                     continue;
@@ -213,6 +222,7 @@ public class Converter {
 
                 String line;
                 while ((line = reader.readLine()) != null) {
+                    line = preTrim(line);
                     try {
                         if (line.charAt(0) == '#')
                             continue;
@@ -222,25 +232,25 @@ public class Converter {
 
                     final int indexEqual = line.indexOf('=');
                     final int indexColon = line.indexOf(':');
-                    final int indexSplit = indexEqual < indexColon && indexEqual >= 0 ? indexEqual : indexColon;
+                    final int indexSplit = indexEqual < indexColon ? (indexEqual < 0 ? indexColon : indexEqual) : (indexColon < 0 ? indexEqual : indexColon);
                     if (indexSplit < 0) {
                         System.err.println("Invalid line: " + line);
                         continue;
                     }
-                    final String key = line.substring(0, indexSplit - 1).trim().replaceAll("[']", "\\'");
-                    String value = line.substring(indexSplit, line.length()).trim().replaceAll("[']", "\\'");
+                    final String key = line.substring(0, indexSplit).trim().replaceAll("[']", "\\'");
+                    String value = line.substring(indexSplit + 1, line.length()).trim().replaceAll("[']", "\\'");
                     String lastValue = value;
 
-                    while (value.lastIndexOf('\\') == value.length() - 1) {
+                    while (isContinuedLine(value)) {
                         if ((value = reader.readLine()) == null) break;
-                        lastValue += value;
+                        lastValue += "n" + value; // n -> \n, because value.last is '\'
                     }
 
                     output.add("i18n['" + fileSubName + "']['" + key + "']='" + lastValue + "';");
                 }
 
                 Files.write(Paths.get(targetFile.toURI()), output, Charset.forName(source.getTargetEncoding()), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
-                System.out.println("   transformed: " + file.getAbsolutePath() + " -> " + targetFile.getAbsolutePath());
+                System.out.println("   converted: " + file.getAbsolutePath() + " -> " + targetFile.getAbsolutePath());
             } catch (IOException e) {
                 e.printStackTrace();
             }
