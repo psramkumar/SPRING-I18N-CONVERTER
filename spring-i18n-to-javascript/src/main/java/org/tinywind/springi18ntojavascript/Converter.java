@@ -23,6 +23,7 @@
  */
 package org.tinywind.springi18ntojavascript;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.tinywind.springi18ntojavascript.jaxb.Configuration;
 import org.tinywind.springi18ntojavascript.jaxb.Source;
 
@@ -51,16 +52,12 @@ public class Converter {
     public final static String REPO_XSD_URL = "https://raw.githubusercontent.com/tinywind/SPRING-I18N-TO-JAVASCRIPT/master/spring-i18n-to-javascript/src/main/resources/xsd/";
     public final static String REPO_CONVERTER_XSD = REPO_XSD_URL + CONVERTER_XSD;
 
-    public Converter() {
-    }
-
     private static boolean isCorrected(Configuration configuration) {
         if (configuration.getSources() == null || configuration.getSources().size() == 0)
             return false;
         for (Source source : configuration.getSources())
             if (source.getSourceDir() == null)
                 return false;
-
         return true;
     }
 
@@ -194,7 +191,7 @@ public class Converter {
             return;
         }
 
-        final String fileFormat = "messages_?([a-zA-Z_]+)?.properties";
+        final String fileFormat = "messages_?([a-zA-Z_]+)?[.]properties";
         final Pattern pattern = Pattern.compile(fileFormat);
         for (File file : childFiles) {
             if (file.exists() && !source.isOverwrite())
@@ -222,31 +219,9 @@ public class Converter {
 
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    line = preTrim(line);
-                    try {
-                        if (line.charAt(0) == '#')
-                            continue;
-                    } catch (StringIndexOutOfBoundsException ignored) {
-                        continue;
-                    }
-
-                    final int indexEqual = line.indexOf('=');
-                    final int indexColon = line.indexOf(':');
-                    final int indexSplit = indexEqual < indexColon ? (indexEqual < 0 ? indexColon : indexEqual) : (indexColon < 0 ? indexEqual : indexColon);
-                    if (indexSplit < 0) {
-                        System.err.println("Invalid line: " + line);
-                        continue;
-                    }
-                    final String key = line.substring(0, indexSplit).trim().replaceAll("[']", "\\'");
-                    String value = line.substring(indexSplit + 1, line.length()).trim().replaceAll("[']", "\\'");
-                    String lastValue = value;
-
-                    while (isContinuedLine(value)) {
-                        if ((value = reader.readLine()) == null) break;
-                        lastValue += "n" + value; // n -> \n, because value.last is '\'
-                    }
-
-                    output.add("i18n['" + fileSubName + "']['" + key + "']='" + lastValue + "';");
+                    final StringKeyValue keyValue = addOutput(line, reader, source.isDescribeByUnicode());
+                    if (keyValue == null) continue;
+                    output.add("i18n['" + fileSubName + "']['" + keyValue.getKey() + "']='" + keyValue.getValue() + "';");
                 }
 
                 Files.write(Paths.get(targetFile.toURI()), output, Charset.forName(source.getTargetEncoding()), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
@@ -254,6 +229,48 @@ public class Converter {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private StringKeyValue addOutput(String line, BufferedReader reader, Boolean describeByUnicode) throws IOException {
+        line = preTrim(line);
+        if (line.length() == 0 || line.charAt(0) == '#')
+            return null;
+
+        final int indexEqual = line.indexOf('=');
+        final int indexColon = line.indexOf(':');
+        final int indexSplit = indexEqual < indexColon ? (indexEqual < 0 ? indexColon : indexEqual) : (indexColon < 0 ? indexEqual : indexColon);
+        if (indexSplit < 0) {
+            System.err.println("Invalid line: " + line);
+            return null;
+        }
+        final String key = line.substring(0, indexSplit).trim().replaceAll("[']", "\\'");
+        String value = line.substring(indexSplit + 1, line.length()).trim().replaceAll("[']", "\\'");
+        String lastValue = value;
+
+        while (isContinuedLine(value)) {
+            if ((value = reader.readLine()) == null) break;
+            lastValue += "n" + value; // n -> \n, because value.last is '\'
+        }
+
+        return new StringKeyValue(key, describeByUnicode ? StringEscapeUtils.unescapeJava(lastValue) : lastValue);
+    }
+
+    private class StringKeyValue {
+        private String key;
+        private String value;
+
+        StringKeyValue(String key, String value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        String getKey() {
+            return key;
+        }
+
+        String getValue() {
+            return value;
         }
     }
 }
