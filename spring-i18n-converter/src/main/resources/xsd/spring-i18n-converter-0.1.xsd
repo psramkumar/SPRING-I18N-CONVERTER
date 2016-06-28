@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema xmlns:tns="https://raw.githubusercontent.com/tinywind/SPRING-I18N-TO-JAVASCRIPT/master/spring-i18n-to-javascript/src/main/resources/xsd/spring-i18n-to-javascript-0.1.xsd"
+<schema xmlns:tns="https://raw.githubusercontent.com/tinywind/SPRING-I18N-CONVERTER/master/spring-i18n-converter/src/main/resources/xsd/spring-i18n-converter-0.1.xsd"
         xmlns="http://www.w3.org/2001/XMLSchema"
-        targetNamespace="https://raw.githubusercontent.com/tinywind/SPRING-I18N-TO-JAVASCRIPT/master/spring-i18n-to-javascript/src/main/resources/xsd/spring-i18n-to-javascript-0.1.xsd"
+        targetNamespace="https://raw.githubusercontent.com/tinywind/SPRING-I18N-CONVERTER/master/spring-i18n-converter/src/main/resources/xsd/spring-i18n-converter-0.1.xsd"
         elementFormDefault="qualified"
 >
 
@@ -15,13 +15,17 @@
 
     <complexType name="Sources">
         <sequence>
-            <element name="sources" type="tns:Source" minOccurs="1" maxOccurs="unbounded"/>
+            <element name="source" type="tns:Source" minOccurs="1" maxOccurs="unbounded"/>
         </sequence>
     </complexType>
 
     <complexType name="Source">
         <all>
+            <element name="converter" type="string" minOccurs="0"
+                     default="org.tinywind.springi18nconverter.JavascriptConverter"/>
+            <element name="toMessageProperties" type="boolean" default="false" minOccurs="0"/>
             <element name="sourceDir" type="string"/>
+            <element name="sourceEncoding" type="string" default="UTF-8" minOccurs="0"/>
             <element name="describeByUnicode" type="boolean" default="false" minOccurs="0"/>
             <element name="targetDir" type="string" default="" minOccurs="0"/>
             <element name="targetEncoding" type="string" default="UTF-8" minOccurs="0"/>

@@ -21,16 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.tinywind.springi18ntojavascript.maven;
+package org.tinywind.springi18nconverter.maven;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import org.tinywind.springi18ntojavascript.Converter;
-import org.tinywind.springi18ntojavascript.jaxb.Configuration;
-import org.tinywind.springi18ntojavascript.jaxb.Source;
+import org.tinywind.springi18nconverter.Launcher;
+import org.tinywind.springi18nconverter.jaxb.Configuration;
+import org.tinywind.springi18nconverter.jaxb.Source;
 
 import javax.xml.bind.JAXB;
 import java.io.IOException;
@@ -63,7 +63,7 @@ public class Plugin extends AbstractMojo {
     @Override
     public void execute() throws MojoExecutionException {
         if (skip) {
-            getLog().info("Skip SPRING-I18N-TO-JAVASCRIPT");
+            getLog().info("Skip SPRING-I18N-CONVERTER");
             return;
         }
 
@@ -76,7 +76,7 @@ public class Plugin extends AbstractMojo {
         getLog().debug("Using this configuration:\n" + writer.toString());
 
         try {
-            Converter.generate(configuration);
+            Launcher.generate(configuration);
         } catch (IOException e) {
             e.printStackTrace();
             getLog().error(e.getMessage());
@@ -85,6 +85,6 @@ public class Plugin extends AbstractMojo {
             return;
         }
 
-        getLog().info("Complete SPRING-I18N-TO-JAVASCRIPT");
+        getLog().info("Complete SPRING-I18N-CONVERTER");
     }
 }

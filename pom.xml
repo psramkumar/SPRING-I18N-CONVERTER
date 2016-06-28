@@ -5,48 +5,48 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.tinywind</groupId>
-    <artifactId>spring-i18n-to-javascript-parent</artifactId>
+    <artifactId>spring-i18n-converter-parent</artifactId>
     <version>0.1</version>
     <packaging>pom</packaging>
 
-    <name>SPRING-I18N-TO-JAVASCRIPT Parent</name>
+    <name>SPRING-I18N-CONVERTER Parent</name>
 
     <description>
         Spring's message_?(\[a-zA-Z_\]+)?.properties convert to JS file
     </description>
 
-    <url>https://github.com/tinywind/SPRING-I18N-TO-JAVASCRIPT</url>
+    <url>https://github.com/tinywind/SPRING-I18N-CONVERTER</url>
 
     <licenses>
         <license>
             <name>The MIT License (MIT)</name>
-            <url>https://raw.githubusercontent.com/tinywind/SPRING-I18N-TO-JAVASCRIPT/master/LICENSE.txt</url>
+            <url>https://raw.githubusercontent.com/tinywind/SPRING-I18N-CONVERTER/master/LICENSE.txt</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
 
     <scm>
-        <developerConnection>https://github.com/tinywind/SPRING-I18N-TO-JAVASCRIPT.git</developerConnection>
-        <url>https://github.com/tinywind/SPRING-I18N-TO-JAVASCRIPT.git</url>
-        <connection>git://github.com/tinywind/SPRING-I18N-TO-JAVASCRIPT.git</connection>
+        <developerConnection>https://github.com/tinywind/SPRING-I18N-CONVERTER.git</developerConnection>
+        <url>https://github.com/tinywind/SPRING-I18N-CONVERTER.git</url>
+        <connection>git://github.com/tinywind/SPRING-I18N-CONVERTER.git</connection>
     </scm>
 
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/tinywind/SPRING-I18N-TO-JAVASCRIPT/issues</url>
+        <url>https://github.com/tinywind/SPRING-I18N-CONVERTER/issues</url>
     </issueManagement>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.tinywind</groupId>
-                <artifactId>spring-i18n-to-javascript</artifactId>
+                <artifactId>spring-i18n-converter</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.tinywind</groupId>
-                <artifactId>spring-i18n-to-javascript-maven</artifactId>
+                <artifactId>spring-i18n-converter-maven</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
@@ -103,8 +103,8 @@
     </build>
 
     <modules>
-        <module>spring-i18n-to-javascript</module>
-        <module>spring-i18n-to-javascript-maven</module>
+        <module>spring-i18n-converter</module>
+        <module>spring-i18n-converter-maven</module>
     </modules>
 
     <profiles>

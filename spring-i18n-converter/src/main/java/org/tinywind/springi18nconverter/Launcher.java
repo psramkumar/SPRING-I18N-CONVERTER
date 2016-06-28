@@ -21,11 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.tinywind.springi18ntojavascript;
+package org.tinywind.springi18nconverter;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.tinywind.springi18ntojavascript.jaxb.Configuration;
-import org.tinywind.springi18ntojavascript.jaxb.Source;
+import org.tinywind.springi18nconverter.jaxb.Configuration;
+import org.tinywind.springi18nconverter.jaxb.Source;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
@@ -33,12 +32,8 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.validation.SchemaFactory;
 import java.io.*;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,10 +42,11 @@ import static java.lang.System.exit;
 /**
  * @author tinywind
  */
-public class Converter {
-    public final static String CONVERTER_XSD = "spring-i18n-to-javascript-0.1.xsd";
-    public final static String REPO_XSD_URL = "https://raw.githubusercontent.com/tinywind/SPRING-I18N-TO-JAVASCRIPT/master/spring-i18n-to-javascript/src/main/resources/xsd/";
+public class Launcher {
+    public final static String CONVERTER_XSD = "spring-i18n-converter-0.1.xsd";
+    public final static String REPO_XSD_URL = "https://raw.githubusercontent.com/tinywind/SPRING-I18N-CONVERTER/master/spring-i18n-converter/src/main/resources/xsd/";
     public final static String REPO_CONVERTER_XSD = REPO_XSD_URL + CONVERTER_XSD;
+    public final static String MESSAGES_FILE_FORMAT = "messages_?([a-zA-Z_]+)?[.]properties";
 
     private static boolean isCorrected(Configuration configuration) {
         if (configuration.getSources() == null || configuration.getSources().size() == 0)
@@ -63,6 +59,10 @@ public class Converter {
 
     private static void setDefault(Configuration configuration) throws NoSuchFieldException {
         for (Source source : configuration.getSources()) {
+            if (source.getConverter() == null)
+                source.setConverter(Source.class.getField("converter").getAnnotation(XmlElement.class).defaultValue());
+            if (source.getSourceEncoding() == null)
+                source.setSourceEncoding(Source.class.getField("sourceEncoding").getAnnotation(XmlElement.class).defaultValue());
             if (source.getTargetDir() == null)
                 source.setTargetDir(Source.class.getField("targetDir").getAnnotation(XmlElement.class).defaultValue());
             if (source.getTargetEncoding() == null)
@@ -73,20 +73,22 @@ public class Converter {
                 source.setOverwrite(Boolean.valueOf(Source.class.getField("overwrite").getAnnotation(XmlElement.class).defaultValue()));
             if (source.isDescribeByUnicode() == null)
                 source.setDescribeByUnicode(Boolean.valueOf(Source.class.getField("describeByUnicode").getAnnotation(XmlElement.class).defaultValue()));
+            if (source.isToMessageProperties() == null)
+                source.setToMessageProperties(Boolean.valueOf(Source.class.getField("toMessageProperties").getAnnotation(XmlElement.class).defaultValue()));
         }
     }
 
     public static void main(String[] args) {
         if (args.length < 1) {
-            System.err.println("Usage : Converter <configuration-file>");
+            System.err.println("Usage : " + Launcher.class.getName() + " <configuration-file>");
             exit(-1);
         }
 
         for (String arg : args) {
-            InputStream in = Converter.class.getResourceAsStream(arg);
+            InputStream in = Launcher.class.getResourceAsStream(arg);
             try {
                 if (in == null && !arg.startsWith("/"))
-                    in = Converter.class.getResourceAsStream("/" + arg);
+                    in = Launcher.class.getResourceAsStream("/" + arg);
 
                 if (in == null && new File(arg).exists())
                     in = new FileInputStream(new File(arg));
@@ -116,7 +118,7 @@ public class Converter {
                 }
             }
         }
-        System.out.println("complete convert message.properties -> message.js");
+        System.out.println("COMPLETE CONVERT");
     }
 
     private static Configuration load(InputStream in) throws IOException {
@@ -138,7 +140,7 @@ public class Converter {
             final SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
             final JAXBContext ctx = JAXBContext.newInstance(Configuration.class);
             final Unmarshaller unmarshaller = ctx.createUnmarshaller();
-            unmarshaller.setSchema(sf.newSchema(Converter.class.getResource("/xsd/" + CONVERTER_XSD)));
+            unmarshaller.setSchema(sf.newSchema(Launcher.class.getResource("/xsd/" + CONVERTER_XSD)));
             unmarshaller.setEventHandler(event -> true);
             return (Configuration) unmarshaller.unmarshal(new StringReader(xml));
         } catch (Exception e) {
@@ -151,6 +153,7 @@ public class Converter {
             System.err.println("Incorrect xml");
             return;
         }
+
         try {
             setDefault(configuration);
         } catch (NoSuchFieldException e) {
@@ -158,17 +161,16 @@ public class Converter {
             return;
         }
 
-        final Converter codegen = new Converter();
-        configuration.getSources().forEach(source -> codegen.generate(new File(source.getSourceDir()), "", source));
+        configuration.getSources().forEach(source -> new Launcher().generate(new File(source.getSourceDir()), "", source));
     }
 
-    private static String preTrim(String str) {
+    public static String preTrim(String str) {
         final Matcher matcher = Pattern.compile("^(\\s+)").matcher(str);
         if (!matcher.find()) return str;
         return str.substring(matcher.end(), str.length());
     }
 
-    private static boolean isContinuedLine(String line) {
+    public static boolean isContinuedLine(String line) {
         final Matcher matcher = Pattern.compile("(\\\\+)$").matcher(line);
         return matcher.find() && matcher.group().length() % 2 == 1;
     }
@@ -191,86 +193,44 @@ public class Converter {
             return;
         }
 
-        final String fileFormat = "messages_?([a-zA-Z_]+)?[.]properties";
-        final Pattern pattern = Pattern.compile(fileFormat);
+        Convertible converter;
+        try {
+            converter = (Convertible) Class.forName(source.getConverter().trim()).getConstructor(new Class[]{}).newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        }
+
         for (File file : childFiles) {
             if (file.exists() && !source.isOverwrite())
                 continue;
 
-            final String fileName = file.getName();
-            final Matcher matcher = pattern.matcher(fileName);
-            if (!matcher.find())
-                continue;
+            if (source.isToMessageProperties()) {
+                converter.decode(file, source.getTargetDir(), source.getTargetEncoding(), source.isDescribeByUnicode());
+            } else {
+                final String fileName = file.getName();
 
-            final String languageName = matcher.group(1);
-            final String fileSubName = languageName != null && languageName.trim().length() > 0 ? languageName : "default";
-            final File targetFile = new File(targetDir, fileSubName + ".js");
-            if (targetFile.exists())
-                if (!source.isOverwrite() || targetFile.isDirectory())
+                final Pattern pattern = Pattern.compile(MESSAGES_FILE_FORMAT);
+                final Matcher matcher = pattern.matcher(fileName);
+                if (!matcher.find())
                     continue;
 
-            try {
-                final String originCode = new String(Files.readAllBytes(Paths.get(file.toURI())), "UTF-8");
-                final BufferedReader reader = new BufferedReader(new StringReader(originCode));
-                final List<String> output = new ArrayList<>();
+                final String languageName = matcher.group(1);
 
-                output.add("if(i18n==null)i18n={};");
-                output.add("i18n['" + fileSubName + "']={};");
+                final String fileSubName = languageName != null && languageName.trim().length() > 0 ? languageName : "default";
+                final File targetFile = new File(targetDir, converter.encodingFileName(fileSubName));
+                if (targetFile.exists())
+                    if (!source.isOverwrite() || targetFile.isDirectory())
+                        continue;
 
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    final StringKeyValue keyValue = addOutput(line, reader, source.isDescribeByUnicode());
-                    if (keyValue == null) continue;
-                    output.add("i18n['" + fileSubName + "']['" + keyValue.getKey() + "']='" + keyValue.getValue() + "';");
+                try {
+                    final String originCode = new String(Files.readAllBytes(Paths.get(file.toURI())), source.getSourceEncoding());
+                    converter.encode(originCode, fileSubName, targetFile, source.getTargetEncoding(), source.isDescribeByUnicode());
+                    System.out.println("   converted: " + file.getAbsolutePath() + " -> " + targetFile.getAbsolutePath());
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-
-                Files.write(Paths.get(targetFile.toURI()), output, Charset.forName(source.getTargetEncoding()), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
-                System.out.println("   converted: " + file.getAbsolutePath() + " -> " + targetFile.getAbsolutePath());
-            } catch (IOException e) {
-                e.printStackTrace();
             }
-        }
-    }
-
-    private StringKeyValue addOutput(String line, BufferedReader reader, Boolean describeByUnicode) throws IOException {
-        line = preTrim(line);
-        if (line.length() == 0 || line.charAt(0) == '#')
-            return null;
-
-        final int indexEqual = line.indexOf('=');
-        final int indexColon = line.indexOf(':');
-        final int indexSplit = indexEqual < indexColon ? (indexEqual < 0 ? indexColon : indexEqual) : (indexColon < 0 ? indexEqual : indexColon);
-        if (indexSplit < 0) {
-            System.err.println("Invalid line: " + line);
-            return null;
-        }
-        final String key = line.substring(0, indexSplit).trim().replaceAll("[']", "\\'");
-        String value = line.substring(indexSplit + 1, line.length()).trim().replaceAll("[']", "\\'");
-        String lastValue = value;
-
-        while (isContinuedLine(value)) {
-            if ((value = reader.readLine()) == null) break;
-            lastValue += "n" + value; // n -> \n, because value.last is '\'
-        }
-
-        return new StringKeyValue(key, describeByUnicode ? StringEscapeUtils.unescapeJava(lastValue) : lastValue);
-    }
-
-    private class StringKeyValue {
-        private String key;
-        private String value;
-
-        StringKeyValue(String key, String value) {
-            this.key = key;
-            this.value = value;
-        }
-
-        String getKey() {
-            return key;
-        }
-
-        String getValue() {
-            return value;
         }
     }
 }

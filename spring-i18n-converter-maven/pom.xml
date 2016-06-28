@@ -5,19 +5,19 @@
 
     <parent>
         <groupId>org.tinywind</groupId>
-        <artifactId>spring-i18n-to-javascript-parent</artifactId>
+        <artifactId>spring-i18n-converter-parent</artifactId>
         <version>0.1</version>
     </parent>
 
-    <artifactId>spring-i18n-to-javascript-maven</artifactId>
-    <name>SPRING-I18N-TO-JAVASCRIPT Maven</name>
+    <artifactId>spring-i18n-converter-maven</artifactId>
+    <name>SPRING-I18N-CONVERTER Maven</name>
 
     <packaging>maven-plugin</packaging>
 
     <licenses>
         <license>
             <name>The MIT License (MIT)</name>
-            <url>https://raw.githubusercontent.com/tinywind/SPRING-I18N-TO-JAVASCRIPT/master/LICENSE.txt</url>
+            <url>https://raw.githubusercontent.com/tinywind/SPRING-I18N-CONVERTER/master/LICENSE.txt</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
@@ -52,7 +52,7 @@
     <dependencies>
         <dependency>
             <groupId>org.tinywind</groupId>
-            <artifactId>spring-i18n-to-javascript</artifactId>
+            <artifactId>spring-i18n-converter</artifactId>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
