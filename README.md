@@ -5,6 +5,8 @@ Spring's message_?(\[a-zA-Z_\]+)?.properties convert to JS file
 ![capture](https://raw.githubusercontent.com/tinywind/SPRING-I18N-CONVERTER/master/capture1.png "comment")
 * message_ko_KR.properties & ko_KR.js 
 ![capture](https://raw.githubusercontent.com/tinywind/SPRING-I18N-CONVERTER/master/capture2.png "comment")
+* message_ko_KR.properties & ko_KR.xlsx 
+![capture](https://raw.githubusercontent.com/tinywind/SPRING-I18N-CONVERTER/master/capture3.png "comment")
 
 # configure maven
     <build>
