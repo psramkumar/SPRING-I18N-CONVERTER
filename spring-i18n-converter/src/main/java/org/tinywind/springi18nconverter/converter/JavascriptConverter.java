@@ -21,9 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.tinywind.springi18nconverter;
-
-import org.apache.commons.lang.StringEscapeUtils;
+package org.tinywind.springi18nconverter.converter;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -36,20 +34,15 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static org.tinywind.springi18nconverter.Launcher.isContinuedLine;
-import static org.tinywind.springi18nconverter.Launcher.preTrim;
 
 /**
  * @author tinywind
  */
-public class JavascriptConverter implements Convertible {
+public class JavascriptConverter extends AbstractConverter {
     public final static String JS_POSTFIX = ".js";
 
     @Override
-    public void encode(String source, String languageName, File targetFile, String targetFileEncoding, Boolean describeByUnicode) throws IOException {
+    public void encode(String source, String languageName, File targetFile, String targetFileEncoding, Boolean describeByNative) throws IOException {
         final BufferedReader reader = new BufferedReader(new StringReader(source));
         final List<String> output = new ArrayList<>();
 
@@ -58,7 +51,7 @@ public class JavascriptConverter implements Convertible {
 
         String line;
         while ((line = reader.readLine()) != null) {
-            final StringKeyValue keyValue = addOutput(line, reader, describeByUnicode);
+            final StringKeyValue keyValue = addOutput(line, reader, describeByNative, false);
             if (keyValue == null) continue;
             output.add("i18n['" + languageName + "']['" + keyValue.getKey() + "']='" + keyValue.getValue() + "';");
         }
@@ -67,40 +60,16 @@ public class JavascriptConverter implements Convertible {
                 StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
     }
 
-    private StringKeyValue addOutput(String line, BufferedReader reader, Boolean describeByUnicode) throws IOException {
-        line = preTrim(line);
-        if (line.length() == 0 || line.charAt(0) == '#')
-            return null;
-
-        final int indexEqual = line.indexOf('=');
-        final int indexColon = line.indexOf(':');
-        final int indexSplit = indexEqual < indexColon ? (indexEqual < 0 ? indexColon : indexEqual) : (indexColon < 0 ? indexEqual : indexColon);
-        if (indexSplit < 0) {
-            System.err.println("Invalid line: " + line);
-            return null;
-        }
-        final String key = line.substring(0, indexSplit).trim().replaceAll("[']", "\\'");
-        String value = line.substring(indexSplit + 1, line.length()).trim().replaceAll("[']", "\\'");
-        String lastValue = value;
-
-        while (isContinuedLine(value)) {
-            if ((value = reader.readLine()) == null) break;
-            lastValue += "\\n" + value;
-        }
-
-        return new StringKeyValue(key, describeByUnicode ? StringEscapeUtils.unescapeJava(lastValue) : lastValue);
-    }
-
     @Override
     public String encodingFileName(String languageName) {
-        return languageName + ".js";
+        return languageName + JS_POSTFIX;
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public void decode(File sourceFile, String targetDir, String targetEncoding, Boolean describeByUnicode) {
+    public void decode(File sourceFile, String targetDir, String targetEncoding, Boolean describeByNative) {
         final String sourceFileName = sourceFile.getName().toLowerCase();
-        if (sourceFileName.lastIndexOf(".js") != sourceFileName.length() - ".js".length())
+        if (sourceFileName.lastIndexOf(JS_POSTFIX) != sourceFileName.length() - JS_POSTFIX.length())
             return;
 
         final ScriptEngine engine = new ScriptEngineManager().getEngineByName("nashorn");
@@ -111,46 +80,15 @@ public class JavascriptConverter implements Convertible {
             for (String language : i18n.keySet()) {
                 final List<String> output = new ArrayList<>();
                 i18n.get(language).forEach((key, value) -> {
-                    String inserted = key + "=";
-                    int last = 0;
-                    for (Matcher matcher = Pattern.compile("([\\\\]*\\n)").matcher(value); matcher.find(); inserted = "") {
-                        final int end = matcher.end();
-                        final String subValue = value.substring(last, end - 1);
-                        inserted += (describeByUnicode ? StringEscapeUtils.escapeJava(subValue) : subValue) + "\\";
-                        output.add(inserted);
-                        last = end;
-                    }
-
-                    if (last < value.length()) {
-                        value = value.substring(last, value.length());
-                        output.add(inserted + (describeByUnicode ? StringEscapeUtils.escapeJava(value) : value));
-                    }
+                    addProperty(output, key, value, describeByNative);
                 });
-                Files.write(Paths.get(new File(targetDir, "messages" + (language.equals("default") ? "" : "_" + language) + ".properties").toURI()),
+                Files.write(Paths.get(new File(targetDir, messagesPropertiesFileName(language)).toURI()),
                         output, Charset.forName(targetEncoding),
                         StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
             }
         } catch (ScriptException | IOException e) {
             System.err.println(" FAIL to convert: " + sourceFile.getAbsolutePath());
             e.printStackTrace();
-        }
-    }
-
-    private class StringKeyValue {
-        private String key;
-        private String value;
-
-        StringKeyValue(String key, String value) {
-            this.key = key;
-            this.value = value;
-        }
-
-        String getKey() {
-            return key;
-        }
-
-        String getValue() {
-            return value;
         }
     }
 }

@@ -22,11 +22,11 @@
     <complexType name="Source">
         <all>
             <element name="converter" type="string" minOccurs="0"
-                     default="org.tinywind.springi18nconverter.JavascriptConverter"/>
+                     default="org.tinywind.springi18nconverter.converter.JavascriptConverter"/>
             <element name="toMessageProperties" type="boolean" default="false" minOccurs="0"/>
             <element name="sourceDir" type="string"/>
             <element name="sourceEncoding" type="string" default="UTF-8" minOccurs="0"/>
-            <element name="describeByUnicode" type="boolean" default="false" minOccurs="0"/>
+            <element name="describeByNative" type="boolean" default="false" minOccurs="0"/>
             <element name="targetDir" type="string" default="" minOccurs="0"/>
             <element name="targetEncoding" type="string" default="UTF-8" minOccurs="0"/>
             <element name="overwrite" type="boolean" default="true" minOccurs="0"/>

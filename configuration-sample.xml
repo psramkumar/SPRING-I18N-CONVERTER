@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration
+        xmlns="https://raw.githubusercontent.com/tinywind/SPRING-I18N-CONVERTER/master/spring-i18n-converter/src/main/resources/xsd/spring-i18n-converter-0.1.xsd">
+
+    <sources>
+        <source>
+            <converter>org.tinywind.springi18nconverter.converter.ExcelConverter</converter>
+            <toMessageProperties>true</toMessageProperties>
+            <sourceDir>target</sourceDir>
+            <sourceEncoding>UTF-8</sourceEncoding>
+            <describeByNative>true</describeByNative>
+            <targetDir>target</targetDir>
+            <targetEncoding>UTF-8</targetEncoding>
+            <overwrite>true</overwrite>
+        </source>
+    </sources>
+
+</configuration>

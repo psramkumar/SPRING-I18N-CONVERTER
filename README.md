@@ -28,7 +28,7 @@ Spring's message_?(\[a-zA-Z_\]+)?.properties convert to JS file
                             <targetDir>${project.basedir}/webapp/resources/js/i18n</targetDir>
                             <targetEncoding>UTF-8</targetEncoding>
                             <overwrite>true</overwrite>
-                            <describeByUnicode>true</describeByUnicode>
+                            <describeByNative>true</describeByNative>
                         </source>
                     </sources>
                 </configuration>

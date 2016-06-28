@@ -23,6 +23,7 @@
  */
 package org.tinywind.springi18nconverter;
 
+import org.tinywind.springi18nconverter.converter.AbstractConverter;
 import org.tinywind.springi18nconverter.jaxb.Configuration;
 import org.tinywind.springi18nconverter.jaxb.Source;
 
@@ -71,8 +72,8 @@ public class Launcher {
                 source.setExcludes(Source.class.getField("excludes").getAnnotation(XmlElement.class).defaultValue());
             if (source.isOverwrite() == null)
                 source.setOverwrite(Boolean.valueOf(Source.class.getField("overwrite").getAnnotation(XmlElement.class).defaultValue()));
-            if (source.isDescribeByUnicode() == null)
-                source.setDescribeByUnicode(Boolean.valueOf(Source.class.getField("describeByUnicode").getAnnotation(XmlElement.class).defaultValue()));
+            if (source.isDescribeByNative() == null)
+                source.setDescribeByNative(Boolean.valueOf(Source.class.getField("describeByNative").getAnnotation(XmlElement.class).defaultValue()));
             if (source.isToMessageProperties() == null)
                 source.setToMessageProperties(Boolean.valueOf(Source.class.getField("toMessageProperties").getAnnotation(XmlElement.class).defaultValue()));
         }
@@ -164,17 +165,6 @@ public class Launcher {
         configuration.getSources().forEach(source -> new Launcher().generate(new File(source.getSourceDir()), "", source));
     }
 
-    public static String preTrim(String str) {
-        final Matcher matcher = Pattern.compile("^(\\s+)").matcher(str);
-        if (!matcher.find()) return str;
-        return str.substring(matcher.end(), str.length());
-    }
-
-    public static boolean isContinuedLine(String line) {
-        final Matcher matcher = Pattern.compile("(\\\\+)$").matcher(line);
-        return matcher.find() && matcher.group().length() % 2 == 1;
-    }
-
     private void generate(File sourceDir, String subDir, Source source) {
         if (!sourceDir.exists())
             sourceDir = new File(sourceDir.getAbsolutePath());
@@ -193,9 +183,9 @@ public class Launcher {
             return;
         }
 
-        Convertible converter;
+        AbstractConverter converter;
         try {
-            converter = (Convertible) Class.forName(source.getConverter().trim()).getConstructor(new Class[]{}).newInstance();
+            converter = (AbstractConverter) Class.forName(source.getConverter().trim()).getConstructor(new Class[]{}).newInstance();
         } catch (Exception e) {
             e.printStackTrace();
             return;
@@ -206,7 +196,7 @@ public class Launcher {
                 continue;
 
             if (source.isToMessageProperties()) {
-                converter.decode(file, source.getTargetDir(), source.getTargetEncoding(), source.isDescribeByUnicode());
+                converter.decode(file, source.getTargetDir(), source.getTargetEncoding(), source.isDescribeByNative());
             } else {
                 final String fileName = file.getName();
 
@@ -225,7 +215,7 @@ public class Launcher {
 
                 try {
                     final String originCode = new String(Files.readAllBytes(Paths.get(file.toURI())), source.getSourceEncoding());
-                    converter.encode(originCode, fileSubName, targetFile, source.getTargetEncoding(), source.isDescribeByUnicode());
+                    converter.encode(originCode, fileSubName, targetFile, source.getTargetEncoding(), source.isDescribeByNative());
                     System.out.println("   converted: " + file.getAbsolutePath() + " -> " + targetFile.getAbsolutePath());
                 } catch (IOException e) {
                     e.printStackTrace();
