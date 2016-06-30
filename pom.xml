@@ -201,11 +201,6 @@
                                 </goals>
                             </execution>
                         </executions>
-                        <configuration>
-                            <gpgArguments>
-                                <!--<argument>&#45;&#45;no-tty</argument>-->
-                            </gpgArguments>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>
