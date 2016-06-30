@@ -26,11 +26,22 @@ Spring's message_?(\[a-zA-Z_\]+)?.properties convert to JS file
                 <configuration>
                     <sources>
                         <source>
+                            <converter>org.tinywind.springi18nconverter.converter.JavascriptConverter</converter>
+                            <toMessageProperties>false</toMessageProperties>
                             <sourceDir>${project.basedir}/src/main/resources/i18n</sourceDir>
-                            <targetDir>${project.basedir}/webapp/resources/js/i18n</targetDir>
+                            <targetDir>${project.basedir}/src/main/webapp/!resources/js/i18n</targetDir>
                             <targetEncoding>UTF-8</targetEncoding>
-                            <overwrite>true</overwrite>
                             <describeByNative>true</describeByNative>
+                            <overwrite>true</overwrite>
+                        </source>
+                        <source>
+                            <converter>org.tinywind.springi18nconverter.converter.ExcelConverter</converter>
+                            <toMessageProperties>false</toMessageProperties>
+                            <sourceDir>${project.basedir}/src/main/resources/i18n</sourceDir>
+                            <targetDir>${project.basedir}/doc</targetDir>
+                            <targetEncoding>UTF-8</targetEncoding>
+                            <describeByNative>true</describeByNative>
+                            <overwrite>true</overwrite>
                         </source>
                     </sources>
                 </configuration>
@@ -55,8 +66,10 @@ Spring's message_?(\[a-zA-Z_\]+)?.properties convert to JS file
     [INFO] ------------------------------------------------------------------------
     [INFO] 
     [INFO] --- spring-i18n-converter-maven:0.1:generate (default-cli) @ tenbillion ---
-       converted: C:\Users\tinywind\IdeaProjects\tenbillion\src\main\resources\i18n\messages.properties -> C:\Users\tinywind\IdeaProjects\tenbillion\webapp\resources\js\i18n\default.js
-       converted: C:\Users\tinywind\IdeaProjects\tenbillion\src\main\resources\i18n\messages_ko_KR.properties -> C:\Users\tinywind\IdeaProjects\tenbillion\webapp\resources\js\i18n\ko_KR.js
+       converted: C:\Users\tinywind\IdeaProjects\guidemon\src\main\resources\i18n\messages.properties -> C:\Users\tinywind\IdeaProjects\guidemon\src\main\webapp\!resources\js\i18n\default.js
+       converted: C:\Users\tinywind\IdeaProjects\guidemon\src\main\resources\i18n\messages_ko.properties -> C:\Users\tinywind\IdeaProjects\guidemon\src\main\webapp\!resources\js\i18n\ko.js
+       converted: C:\Users\tinywind\IdeaProjects\guidemon\src\main\resources\i18n\messages.properties -> C:\Users\tinywind\IdeaProjects\guidemon\doc\default.xlsx
+       converted: C:\Users\tinywind\IdeaProjects\guidemon\src\main\resources\i18n\messages_ko.properties -> C:\Users\tinywind\IdeaProjects\guidemon\doc\ko.xlsx
     [INFO] Complete SPRING-I18N-CONVERTER
     [INFO] ------------------------------------------------------------------------
     [INFO] BUILD SUCCESS
