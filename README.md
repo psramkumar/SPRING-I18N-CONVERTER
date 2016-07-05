@@ -9,7 +9,7 @@ Spring's message_?(\[a-zA-Z_\]+)?.properties convert to JS file
 ![capture](https://raw.githubusercontent.com/tinywind/SPRING-I18N-CONVERTER/master/capture3.png "comment")
 
 # Features
-* **messages.properties** to **{locale}.js** 
+* **messages.properties** to **{locale}.js** : refer https://github.com/tinywind/SPRING-I18N-CONVERTER/tree/master/apply-converted-js
 * **{locale}.js** to **messages.properties**
 * **messages.properties** to **{locale}.xlsx** 
 * **{locale}.xlsx** to **messages.properties** 
