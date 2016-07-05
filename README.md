@@ -8,6 +8,12 @@ Spring's message_?(\[a-zA-Z_\]+)?.properties convert to JS file
 * message_ko_KR.properties & ko_KR.xlsx 
 ![capture](https://raw.githubusercontent.com/tinywind/SPRING-I18N-CONVERTER/master/capture3.png "comment")
 
+# Features
+* **messages.properties** to **{locale}.js** 
+* **{locale}.js** to **messages.properties**
+* **messages.properties** to **{locale}.xlsx** 
+* **{locale}.xlsx** to **messages.properties** 
+
 # configure maven
     <build>
         <plugins>
