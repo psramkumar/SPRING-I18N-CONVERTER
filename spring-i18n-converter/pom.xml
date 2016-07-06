@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.tinywind</groupId>
         <artifactId>spring-i18n-converter-parent</artifactId>
-        <version>0.1</version>
+        <version>0.1.1</version>
     </parent>
 
     <artifactId>spring-i18n-converter</artifactId>

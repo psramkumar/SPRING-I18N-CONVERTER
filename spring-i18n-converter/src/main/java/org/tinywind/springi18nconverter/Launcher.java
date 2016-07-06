@@ -50,11 +50,16 @@ public class Launcher {
     public final static String MESSAGES_FILE_FORMAT = "messages_?([a-zA-Z_]+)?[.]properties";
 
     private static boolean isCorrected(Configuration configuration) {
-        if (configuration.getSources() == null || configuration.getSources().size() == 0)
+        if (configuration.getSources() == null || configuration.getSources().size() == 0) {
+            System.err.println("  not found source!");
             return false;
-        for (Source source : configuration.getSources())
-            if (source.getSourceDir() == null)
+        }
+        for (Source source : configuration.getSources()) {
+            if (source.getSourceDir() == null) {
+                System.err.println("  not found sourceDir!");
                 return false;
+            }
+        }
         return true;
     }
 
@@ -151,7 +156,7 @@ public class Launcher {
 
     public static void generate(Configuration configuration) throws IOException {
         if (!isCorrected(configuration)) {
-            System.err.println("Incorrect xml");
+            System.err.println("Incorrect configuration xml");
             return;
         }
 

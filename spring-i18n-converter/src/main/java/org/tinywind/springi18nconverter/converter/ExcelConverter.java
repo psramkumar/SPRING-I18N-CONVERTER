@@ -99,7 +99,7 @@ public class ExcelConverter extends AbstractConverter {
                 final Row row = rowIterator.next();
                 final String key = row.getCell(COLUMN_KEY).getStringCellValue();
                 final String language = row.getCell(COLUMN_LANG).getStringCellValue();
-                final String value = row.getCell(COLUMN_VALUE).getStringCellValue();
+                final String value = row.getCell(COLUMN_VALUE).getStringCellValue().trim();
                 if (StringUtils.isEmpty(key) || StringUtils.isEmpty(language) || StringUtils.isEmpty(value)) continue;
 
                 List<String> stringList = stringListMap.get(language);
@@ -108,7 +108,15 @@ public class ExcelConverter extends AbstractConverter {
                     stringListMap.put(language, stringList);
                 }
 
-                addProperty(stringList, key, value, describeByNative);
+                final String newLine = "\\\n";
+                String lastValue = "", token;
+                final BufferedReader reader = new BufferedReader(new StringReader(value));
+                while ((token = reader.readLine()) != null) lastValue += token + newLine;
+                reader.close();
+                if (lastValue.lastIndexOf(newLine) == lastValue.length() - newLine.length())
+                    lastValue = lastValue.substring(0, lastValue.length() - newLine.length());
+
+                addProperty(stringList, key, lastValue, describeByNative);
             }
 
             for (String language : stringListMap.keySet()) {

@@ -53,7 +53,7 @@ public class JavascriptConverter extends AbstractConverter {
         while ((line = reader.readLine()) != null) {
             final StringKeyValue keyValue = addOutput(line, reader, describeByNative, false);
             if (keyValue == null) continue;
-            output.add("i18n['" + languageName + "']['" + keyValue.getKey() + "']='" + keyValue.getValue() + "';");
+            output.add("i18n['" + languageName + "']['" + keyValue.getKey() + "']='" + keyValue.getValue().replaceAll("[']", "\\\\'") + "';");
         }
 
         Files.write(Paths.get(targetFile.toURI()), output, Charset.forName(targetFileEncoding),

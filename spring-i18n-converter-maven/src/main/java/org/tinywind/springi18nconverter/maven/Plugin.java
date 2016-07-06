@@ -43,22 +43,21 @@ import static org.apache.maven.plugins.annotations.ResolutionScope.TEST;
 /**
  * @author tinywind
  */
-@Mojo(name = "generate", defaultPhase = GENERATE_SOURCES, requiresDependencyResolution = TEST)
 public class Plugin extends AbstractMojo {
     /**
      * The Maven project.
      */
     @Parameter(property = "project", required = true, readonly = true)
-    private MavenProject project;
+    protected MavenProject project;
 
     /**
      * Whether to skip the execution of the Maven Plugin for this module.
      */
     @Parameter
-    private boolean skip;
+    protected boolean skip;
 
     @Parameter
-    private List<Source> sources;
+    protected List<Source> sources;
 
     @Override
     public void execute() throws MojoExecutionException {
