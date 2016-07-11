@@ -6,7 +6,7 @@
 
     <groupId>org.tinywind</groupId>
     <artifactId>spring-i18n-converter-parent</artifactId>
-    <version>0.1</version>
+    <version>0.1.1</version>
     <packaging>pom</packaging>
 
     <name>SPRING-I18N-CONVERTER Parent</name>

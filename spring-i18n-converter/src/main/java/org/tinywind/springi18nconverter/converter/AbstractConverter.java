@@ -95,7 +95,7 @@ public abstract class AbstractConverter {
 
         while (isContinuedLine(value)) {
             if ((value = reader.readLine()) == null) break;
-            lastValue += (newLine ? "\n" : "\\n") + value;
+            lastValue = (newLine ? lastValue.substring(0, lastValue.length() - 1) + "\n" : lastValue + "\\n") + value;
         }
 
         return new StringKeyValue(key, describeByNative ? StringEscapeUtils.unescapeJava(lastValue) : lastValue);

@@ -8,13 +8,19 @@ Spring's message_?(\[a-zA-Z_\]+)?.properties convert to JS file
 * message_ko_KR.properties & ko_KR.xlsx 
 ![capture](https://raw.githubusercontent.com/tinywind/SPRING-I18N-CONVERTER/master/capture3.png "comment")
 
+# Features
+* **messages.properties** to **{locale}.js** : refer https://github.com/tinywind/SPRING-I18N-CONVERTER/tree/master/apply-converted-js
+* **{locale}.js** to **messages.properties**
+* **messages.properties** to **{locale}.xlsx** 
+* **{locale}.xlsx** to **messages.properties** 
+
 # configure maven
     <build>
         <plugins>
             <plugin>
                 <groupId>org.tinywind</groupId>
                 <artifactId>spring-i18n-converter-maven</artifactId>
-                <version>0.1</version>
+                <version>0.1.1</version>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>
@@ -50,7 +56,7 @@ Spring's message_?(\[a-zA-Z_\]+)?.properties convert to JS file
     </build>
 
 # result
-    "C:\Program Files\Java\jdk1.8.0_73\bin\java" "-Dmaven.home=C:\Program Files (x86)\JetBrains\IntelliJ IDEA 2016.1.1\plugins\maven\lib\maven3" "-Dclassworlds.conf=C:\Program Files (x86)\JetBrains\IntelliJ IDEA 2016.1.1\plugins\maven\lib\maven3\bin\m2.conf" -Didea.launcher.port=7540 "-Didea.launcher.bin.path=C:\Program Files (x86)\JetBrains\IntelliJ IDEA 2016.1.1\bin" -Dfile.encoding=UTF-8 -classpath "C:\Program Files (x86)\JetBrains\IntelliJ IDEA 2016.1.1\plugins\maven\lib\maven3\boot\plexus-classworlds-2.4.jar;C:\Program Files (x86)\JetBrains\IntelliJ IDEA 2016.1.1\lib\idea_rt.jar" com.intellij.rt.execution.application.AppMain org.codehaus.classworlds.Launcher -Didea.version=2016.1.3 org.tinywind:spring-i18n-converter-maven:0.1:generate -P local
+    "C:\Program Files\Java\jdk1.8.0_73\bin\java" "-Dmaven.home=C:\Program Files (x86)\JetBrains\IntelliJ IDEA 2016.1.1\plugins\maven\lib\maven3" "-Dclassworlds.conf=C:\Program Files (x86)\JetBrains\IntelliJ IDEA 2016.1.1\plugins\maven\lib\maven3\bin\m2.conf" -Didea.launcher.port=7540 "-Didea.launcher.bin.path=C:\Program Files (x86)\JetBrains\IntelliJ IDEA 2016.1.1\bin" -Dfile.encoding=UTF-8 -classpath "C:\Program Files (x86)\JetBrains\IntelliJ IDEA 2016.1.1\plugins\maven\lib\maven3\boot\plexus-classworlds-2.4.jar;C:\Program Files (x86)\JetBrains\IntelliJ IDEA 2016.1.1\lib\idea_rt.jar" com.intellij.rt.execution.application.AppMain org.codehaus.classworlds.Launcher -Didea.version=2016.1.3 org.tinywind:spring-i18n-converter-maven:0.1.1:generate -P local
     [INFO] Scanning for projects...
     [WARNING] 
     [WARNING] Some problems were encountered while building the effective model for iruseum:tenbillion:war:0.0.1-SNAPSHOT
@@ -65,7 +71,7 @@ Spring's message_?(\[a-zA-Z_\]+)?.properties convert to JS file
     [INFO] Building Iruseum Tenbillion Webapp 0.0.1-SNAPSHOT
     [INFO] ------------------------------------------------------------------------
     [INFO] 
-    [INFO] --- spring-i18n-converter-maven:0.1:generate (default-cli) @ tenbillion ---
+    [INFO] --- spring-i18n-converter-maven:0.1.1:generate (default-cli) @ tenbillion ---
        converted: C:\Users\tinywind\IdeaProjects\guidemon\src\main\resources\i18n\messages.properties -> C:\Users\tinywind\IdeaProjects\guidemon\src\main\webapp\!resources\js\i18n\default.js
        converted: C:\Users\tinywind\IdeaProjects\guidemon\src\main\resources\i18n\messages_ko.properties -> C:\Users\tinywind\IdeaProjects\guidemon\src\main\webapp\!resources\js\i18n\ko.js
        converted: C:\Users\tinywind\IdeaProjects\guidemon\src\main\resources\i18n\messages.properties -> C:\Users\tinywind\IdeaProjects\guidemon\doc\default.xlsx
